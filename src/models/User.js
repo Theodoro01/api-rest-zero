@@ -17,4 +17,4 @@ schema.pre("save", async function(next){
     next();
 }); 
 
-export default model("user", schema);
+export default model("user", schema, "user");

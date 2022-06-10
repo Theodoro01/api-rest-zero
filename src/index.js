@@ -1,15 +1,16 @@
 import express from "express";
 import routes from "./routes/routes.js";
-import dotenv from "dotenv/config";
-import database from "./database/database.js"
+import dotenv from "dotenv";
+import database from "./database/database.js";
 
 database.connectToDatabase();
+
+dotenv.config();
 
 const app = express();
 
 app.use(express.json());
 app.use("/v1", routes);
-
 
 app.route("/healthcheck").get((_, res) => res.status(200).json({ msg: "OK" }));
 
