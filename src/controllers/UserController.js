@@ -1,19 +1,25 @@
 import User from "../models/user.js"
 import { v4 as uuidv4 } from 'uuid';
 import { validate as isUuid } from 'uuid';
-import crypto from "crypto";
 import token from "../middlewares/token.js";
-import bcrypt from "bcrypt"
-import user from "../models/user.js";
+import bcrypt from "bcrypt";
 
 export default {
+    
     insert: async (req, res) => {
         try{
             const user = req.body;
+
+            const validateName = await user.name; 
             const validateEmail = await User.findOne({email: user.email});
+
+            if(validateName === " "){
+                return res.status(400).send({ error: "The name field is mandatory" });
+            }
             if(validateEmail){
                 return res.status(400).send({ error: "User already exists" });
             }
+
             user._id = uuidv4();   
             const resultCreate = await User.create(user);
             resultCreate.password = undefined;
@@ -21,9 +27,11 @@ export default {
 
             return res.status(201).json({ resultCreate , token: tokenGeneration});
         }catch(err){ 
+            console.log(err)
             return res.status(400).json({error: 'Registration failed'});
         }
     },
+
     login: async (req, res) => {
         try {
             const { email, password } = req.body;   
@@ -45,6 +53,7 @@ export default {
             return res.status(400).json({error: 'Registration failed'});
         }
     },
+
     search: async (req, res) => {
         try{
             const resultSearch = await User.find(); 
@@ -53,6 +62,7 @@ export default {
             return res.status(400).json({error: "Bad Request"});
         }
     },
+
     searchById: async (req, res) => {
         try{
             const {_id } = req.params;
@@ -67,6 +77,7 @@ export default {
             return res.status(400).json({error: "Bad Request"})
         }
     },
+
     deleteById: async (req, res) => {
         try{
             const {_id} = req.params;
@@ -81,22 +92,26 @@ export default {
             return res.status(400).json({error: "there is something wrong"})
         }
     },
+
     updateById: async (req, res) => {
         try{
-            const {_id } = req.params;
-            const name = req.body;
-            // console.log(name)
-            // if(name === "" || name === " "){
-            //     return res.status(400).json({error: "The name is mandatory!"});
-            // }
-            const validateId = await User.findById(_id);
+            const _id  = req.params;
+            const {name}= req.body;
+
+            if(name === "" || name === " "){
+                return res.status(400).json({error: "The name is mandatory!"});
+            }
+
+            const validateId = await User.findOne({_id: _id});
+
             if(!validateId){
                 return res.status(404).json({error: "no user found, insert the correct id!!"});
             }
-            const resultUpdate = await User.findByIdAndUpdate({_id: _id}, name, {new: true})
 
-            return res.status(200).json({resultUpdate});
-        }catch(err){
+            const resultUpdate = await User.updateOne({_id: _id}, {name: name})
+            return res.status(200).json(resultUpdate);
+
+         }catch(err){
             return res.status(400).json({error: "there is something wrong"})
         }
     }

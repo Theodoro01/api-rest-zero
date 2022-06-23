@@ -5,9 +5,9 @@ const {model, Schema} = mongoose;
 
 const schema = new Schema({
     _id : String,    
-    name : { type: String },
-    email:{ type: String, unique: true, lowercase: true},
-    password:{ type: String, select: false }, // select: false = Quando eu buscar uma lista de usuarios, não quero que a senha venha junto
+    name : { type: String, required: true},
+    email:{ type: String, required: true, unique: true, lowercase: true},
+    password:{ type: String, required: true, select: false }, // select: false = Quando eu buscar uma lista de usuarios, não quero que a senha venha junto
     createAt:{ type: Date, default: Date.now }
 });
 
